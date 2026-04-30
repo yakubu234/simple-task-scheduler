@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "../../tests/frontend/dist",
+    "rootDir": "../..",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "../../",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["../../tests/frontend/run-tests.ts", "../../src/lib/projectRoles.ts", "../../src/types/database.ts"]
+}

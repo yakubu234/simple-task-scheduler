@@ -1,0 +1,60 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: taskflow-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: mlh_task
+    ports:
+      - "3307:3306"
+    volumes:
+      - taskflow-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-ppassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taskflow-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: mlh_task
+      JWT_SECRET: your_jwt_secret_here
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - taskflow-backend-node_modules:/app/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: taskflow-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:4000
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - taskflow-frontend-node_modules:/app/node_modules
+
+volumes:
+  taskflow-db-data:
+  taskflow-backend-node_modules:
+  taskflow-frontend-node_modules:
